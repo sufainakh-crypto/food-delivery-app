@@ -1,0 +1,121 @@
+const router = require("express").Router();
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
+const User = require("../Models/usermodels");
+const mongoose = require("mongoose");
+
+// Mock database for when MongoDB is not connected
+const mockUsers = [
+    {
+        name: "Test User",
+        email: "user@example.com",
+        password: "", // Set dynamically below
+        role: "user"
+    }
+];
+
+// Hash the default mock user's password on startup
+(async () => {
+    mockUsers[0].password = await bcrypt.hash("password123", 10);
+})();
+
+const JWT_SECRET = process.env.JWT_SECRET || "fallback_secret_key";
+
+router.post("/register", async (req, res) => {
+    try {
+        const { name, email, password } = req.body;
+
+        if (!name || !email || !password) {
+            return res.status(400).json({ message: "All fields are required" });
+        }
+
+        const emailLower = email.toLowerCase();
+
+        // Check if DB is connected
+        if (mongoose.connection.readyState === 1) {
+            const existingUser = await User.findOne({ email: emailLower });
+            if (existingUser) {
+                return res.status(400).json({ message: "User already exists" });
+            }
+
+            const hashedPassword = await bcrypt.hash(password, 10);
+            const newUser = new User({
+                name,
+                email: emailLower,
+                password: hashedPassword
+            });
+            await newUser.save();
+            return res.status(201).json({ message: "User registered successfully" });
+        } else {
+            // Use In-Memory Mock Database
+            const existingUser = mockUsers.find(u => u.email === emailLower);
+            if (existingUser) {
+                return res.status(400).json({ message: "User already exists (mock db)" });
+            }
+
+            const hashedPassword = await bcrypt.hash(password, 10);
+            mockUsers.push({
+                name,
+                email: emailLower,
+                password: hashedPassword,
+                role: "user"
+            });
+            return res.status(201).json({ message: "User registered successfully (mock db)" });
+        }
+    } catch (error) {
+        console.error("Register error:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
+router.post("/login", async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        if (!email || !password) {
+            return res.status(400).json({ message: "All fields are required" });
+        }
+
+        const emailLower = email.toLowerCase();
+
+        let user = null;
+
+        // Check if DB is connected
+        if (mongoose.connection.readyState === 1) {
+            user = await User.findOne({ email: emailLower });
+        } else {
+            // Use In-Memory Mock Database
+            user = mockUsers.find(u => u.email === emailLower);
+        }
+
+        if (!user) {
+            return res.status(400).json({ message: "Invalid credentials" });
+        }
+
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.status(400).json({ message: "Invalid credentials" });
+        }
+
+        // Generate Token
+        const token = jwt.sign(
+            { id: user._id || user.email, email: user.email, role: user.role },
+            JWT_SECRET,
+            { expiresIn: "1d" }
+        );
+
+        res.json({
+            token,
+            user: {
+                name: user.name,
+                email: user.email,
+                role: user.role
+            }
+        });
+    } catch (error) {
+        console.error("Login error:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
+module.exports = router;

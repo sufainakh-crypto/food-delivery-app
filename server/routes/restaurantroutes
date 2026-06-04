@@ -1,0 +1,16 @@
+const router = require("express").Router();
+
+const mockRestaurants = [
+    { _id: "res1", name: "Pizza Palace", cuisine: "Italian / Pizza" },
+    { _id: "res2", name: "Burger Bistro", cuisine: "Burgers & Fries" },
+    { _id: "res3", name: "Sushi Sun", cuisine: "Japanese Sushi" }
+];
+
+router.get("/", (req, res) => {
+    res.json(mockRestaurants);
+});
+router.post("/", (req, res) => {
+    res.json({ message: "Create restaurant stub" });
+});
+
+module.exports = router;
