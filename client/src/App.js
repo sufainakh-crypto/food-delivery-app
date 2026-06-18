@@ -6,6 +6,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Cart from "./pages/Cart";
 import Orders from "./pages/Orders";
+import Checkout from "./pages/Checkout";
 
 function App() {
     const [user, setUser] = useState(null);
@@ -102,6 +103,20 @@ function App() {
                                 clearCart={clearCart} 
                                 user={user} 
                             />
+                        } 
+                    />
+                    <Route 
+                        path="/checkout" 
+                        element={
+                            user ? (
+                                <Checkout 
+                                    cart={cart}
+                                    clearCart={clearCart}
+                                    user={user}
+                                />
+                            ) : (
+                                <Navigate to="/login" />
+                            )
                         } 
                     />
                     <Route 

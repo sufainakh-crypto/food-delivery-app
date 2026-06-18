@@ -14,6 +14,7 @@ connectDB();
 app.use("/api/users", require("./routes/userroutes"));
 app.use("/api/restaurants", require("./routes/restaurantroutes"));
 app.use("/api/orders", require("./routes/orderroutes"));
+app.use("/api/payment", require("./routes/paymentroutes"));
 
 app.get("/", (req, res) => {
     res.send("Food Delivery API is running...");

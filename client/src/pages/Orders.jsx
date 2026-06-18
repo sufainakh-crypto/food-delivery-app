@@ -128,6 +128,46 @@ function Orders({ user }) {
                                         ))}
                                     </div>
 
+                                    {/* Order Delivery & Payment Meta */}
+                                    <div className="bg-light p-3 rounded-3 mt-3 border d-flex flex-wrap gap-4 text-start justify-content-between">
+                                        <div style={{ flex: "1 1 250px" }}>
+                                            <span className="text-muted d-block fw-bold text-uppercase mb-1" style={{ fontSize: "0.7rem", letterSpacing: "0.5px" }}>Delivery Address</span>
+                                            <span className="text-dark small fw-medium">{order.address || "Not Provided"}</span>
+                                            {order.phone && (
+                                                <div className="text-secondary small mt-1">
+                                                    <i className="bi bi-telephone me-1"></i> {order.phone}
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div style={{ flex: "1 1 150px" }}>
+                                            <span className="text-muted d-block fw-bold text-uppercase mb-1" style={{ fontSize: "0.7rem", letterSpacing: "0.5px" }}>Payment Method</span>
+                                            <span className="text-secondary small fw-bold text-capitalize">
+                                                {order.paymentMethod === "Card" ? (
+                                                    <><i className="bi bi-credit-card me-1 text-primary"></i> Credit/Debit Card</>
+                                                ) : order.paymentMethod === "UPI" ? (
+                                                    <><i className="bi bi-qr-code-scan me-1 text-info"></i> UPI Payment</>
+                                                ) : order.paymentMethod === "COD" ? (
+                                                    <><i className="bi bi-cash-coin me-1 text-success"></i> Cash on Delivery</>
+                                                ) : (
+                                                    order.paymentMethod || "Unknown"
+                                                )}
+                                            </span>
+                                        </div>
+                                        <div style={{ flex: "1 1 150px" }}>
+                                            <span className="text-muted d-block fw-bold text-uppercase mb-1" style={{ fontSize: "0.7rem", letterSpacing: "0.5px" }}>Payment Status</span>
+                                            <span className={`badge py-1 px-2.5 rounded-pill ${
+                                                order.paymentStatus === "Paid" ? "bg-success-subtle text-success-emphasis border border-success-subtle" : "bg-warning-subtle text-warning-emphasis border border-warning-subtle"
+                                            }`} style={{ fontSize: "0.75rem" }}>
+                                                {order.paymentStatus || "Pending"}
+                                            </span>
+                                            {order.transactionId && (
+                                                <div className="text-muted small mt-1 font-monospace" style={{ fontSize: "0.7rem" }}>
+                                                    TXN: {order.transactionId}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+
                                     {/* Action Bar */}
                                     {order.status === "Pending" && (
                                         <div className="d-flex justify-content-end mt-4 pt-3 border-top">

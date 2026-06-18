@@ -7,10 +7,9 @@ const auth = require("../middleware/auth");
 // Helper to check if DB is connected
 const isDBConnected = () => mongoose.connection.readyState === 1;
 
-// POST /api/orders - Place a new order (cart booking)
 router.post("/", auth, async (req, res) => {
     try {
-        const { items, totalAmount } = req.body;
+        const { items, totalAmount, address, phone, paymentMethod, paymentStatus, transactionId } = req.body;
         if (!items || !Array.isArray(items) || items.length === 0) {
             return res.status(400).json({ message: "Order must contain at least one item" });
         }
@@ -19,13 +18,20 @@ router.post("/", auth, async (req, res) => {
         }
 
         const userId = req.user.id;
+        // Determine initial order status: if card/UPI is paid, mark as Confirmed. If COD, mark as Pending.
+        const orderStatus = (paymentMethod === "COD") ? "Pending" : "Confirmed";
 
         if (isDBConnected()) {
             const newOrder = new Order({
                 userId: mongoose.Types.ObjectId.isValid(userId) ? new mongoose.Types.ObjectId(userId) : null,
                 items,
                 totalAmount,
-                status: "Pending"
+                status: orderStatus,
+                address: address || "Not Provided",
+                phone: phone || "Not Provided",
+                paymentMethod: paymentMethod || "Unknown",
+                paymentStatus: paymentStatus || "Pending",
+                transactionId: transactionId || ""
             });
             await newOrder.save();
             return res.status(201).json({
@@ -38,7 +44,12 @@ router.post("/", auth, async (req, res) => {
                 userId,
                 items,
                 totalAmount,
-                status: "Pending",
+                status: orderStatus,
+                address: address || "Not Provided",
+                phone: phone || "Not Provided",
+                paymentMethod: paymentMethod || "Unknown",
+                paymentStatus: paymentStatus || "Pending",
+                transactionId: transactionId || "",
                 createdAt: new Date().toISOString()
             };
             mockOrders.push(newOrder);

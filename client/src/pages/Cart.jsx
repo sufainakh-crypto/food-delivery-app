@@ -14,39 +14,12 @@ function Cart({ cart, updateCartQuantity, removeFromCart, clearCart, user }) {
     const tax = subtotal > 0 ? 1.50 : 0;
     const grandTotal = subtotal + deliveryFee + tax;
 
-    const handleCheckout = async () => {
+    const handleCheckout = () => {
         if (!user) {
             navigate("/login");
             return;
         }
-
-        setSubmitting(true);
-        setError("");
-
-        try {
-            // Format order items for server
-            const orderItems = cart.map(item => ({
-                itemId: item._id,
-                name: item.name,
-                price: item.price,
-                quantity: item.quantity,
-                image: item.image
-            }));
-
-            const response = await api.post("/orders", {
-                items: orderItems,
-                totalAmount: grandTotal
-            });
-
-            setCreatedOrder(response.data.order);
-            setBookingSuccess(true);
-            clearCart();
-        } catch (err) {
-            console.error("Checkout failed:", err);
-            setError(err.response?.data?.message || "Something went wrong. Please try again.");
-        } finally {
-            setSubmitting(false);
-        }
+        navigate("/checkout");
     };
 
     if (bookingSuccess) {
@@ -202,17 +175,11 @@ function Cart({ cart, updateCartQuantity, removeFromCart, clearCart, user }) {
 
                         <button
                             onClick={handleCheckout}
-                            disabled={submitting}
                             className="btn btn-warning w-100 py-3 rounded-3 fw-bold shadow-sm d-flex align-items-center justify-content-center"
                         >
-                            {submitting ? (
+                            {user ? (
                                 <>
-                                    <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                                    Booking Order...
-                                </>
-                            ) : user ? (
-                                <>
-                                    <i className="bi bi-lock-fill me-1.5"></i> Place My Order
+                                    <i className="bi bi-shield-lock-fill me-1.5"></i> Proceed to Checkout
                                 </>
                             ) : (
                                 "Sign In to Place Order"
