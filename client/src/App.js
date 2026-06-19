@@ -8,6 +8,22 @@ import Cart from "./pages/Cart";
 import Orders from "./pages/Orders";
 import Checkout from "./pages/Checkout";
 
+// Admin Imports
+import AdminDashboard from "./pages/AdminDashboard";
+import AdminOwners from "./pages/AdminOwners";
+import AdminFood from "./pages/AdminFood";
+
+// Route Guard for Admin role
+function ProtectedRoute({ user, requiredRole, children }) {
+    if (!user) {
+        return <Navigate to="/admin/login" replace />;
+    }
+    if (requiredRole && user.role !== requiredRole) {
+        return <Navigate to="/" replace />;
+    }
+    return children;
+}
+
 function App() {
     const [user, setUser] = useState(null);
     const [cart, setCart] = useState(() => {
@@ -49,7 +65,7 @@ function App() {
             const existing = prevCart.find((i) => i._id === item._id);
             if (existing) {
                 return prevCart.map((i) =>
-                    i._id === item._id ? { ...i, quantity: i.quantity + 1 } : i
+                     i._id === item._id ? { ...i, quantity: i.quantity + 1 } : i
                 );
             }
             return [...prevCart, { ...item, quantity: 1 }];
@@ -87,7 +103,11 @@ function App() {
                     />
                     <Route
                         path="/login"
-                        element={user ? <Navigate to="/" /> : <Login onLogin={loginUser} />}
+                        element={
+                            user
+                                ? (user.role === "admin" ? <Navigate to="/admin/dashboard" /> : <Navigate to="/" />)
+                                : <Login onLogin={loginUser} />
+                        }
                     />
                     <Route
                         path="/register"
@@ -123,6 +143,38 @@ function App() {
                         path="/orders" 
                         element={user ? <Orders user={user} /> : <Navigate to="/login" />} 
                     />
+                    
+                    {/* Admin Routes */}
+                    {/* /admin/login redirects to the unified /login */}
+                    <Route
+                        path="/admin/login"
+                        element={<Navigate to="/login" replace />}
+                    />
+                    <Route
+                        path="/admin/dashboard"
+                        element={
+                            <ProtectedRoute user={user} requiredRole="admin">
+                                <AdminDashboard />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/admin/owners"
+                        element={
+                            <ProtectedRoute user={user} requiredRole="admin">
+                                <AdminOwners />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/admin/food"
+                        element={
+                            <ProtectedRoute user={user} requiredRole="admin">
+                                <AdminFood />
+                            </ProtectedRoute>
+                        }
+                    />
+
                     <Route path="*" element={<Navigate to="/" />} />
                 </Routes>
             </div>

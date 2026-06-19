@@ -12,7 +12,7 @@ function Navbar({ user, onLogout, cartCount }) {
     return (
         <nav className="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm py-3">
             <div className="container">
-                <Link className="navbar-brand fw-bold fs-4 d-flex align-items-center" to="/">
+                <Link className="navbar-brand fw-bold fs-4 d-flex align-items-center" to={user && user.role === "admin" ? "/admin/dashboard" : "/"}>
                     <i className="bi bi-egg-fried text-warning me-2"></i>
                     5 Star Cafe
                 </Link>
@@ -29,12 +29,15 @@ function Navbar({ user, onLogout, cartCount }) {
                 </button>
                 <div className="collapse navbar-collapse" id="navbarNav">
                     <ul className="navbar-nav me-auto mb-2 mb-lg-0">
-                        <li className="nav-item">
-                            <Link className="nav-link" to="/">
-                                <i className="bi bi-house-door me-1"></i> Home
-                            </Link>
-                        </li>
-                        {user && (
+                        {/* Regular user nav links */}
+                        {(!user || user.role !== "admin") && (
+                            <li className="nav-item">
+                                <Link className="nav-link" to="/">
+                                    <i className="bi bi-house-door me-1"></i> Home
+                                </Link>
+                            </li>
+                        )}
+                        {user && user.role !== "admin" && (
                             <>
                                 <li className="nav-item">
                                     <Link className="nav-link" to="/orders">
@@ -53,12 +56,36 @@ function Navbar({ user, onLogout, cartCount }) {
                                 </li>
                             </>
                         )}
+                        {/* Admin nav links */}
+                        {user && user.role === "admin" && (
+                            <>
+                                <li className="nav-item">
+                                    <Link className="nav-link" to="/admin/dashboard">
+                                        <i className="bi bi-speedometer2 me-1"></i> Dashboard
+                                    </Link>
+                                </li>
+                                <li className="nav-item">
+                                    <Link className="nav-link" to="/admin/owners">
+                                        <i className="bi bi-people-fill me-1"></i> Owners
+                                    </Link>
+                                </li>
+                                <li className="nav-item">
+                                    <Link className="nav-link" to="/admin/food">
+                                        <i className="bi bi-egg-fried me-1"></i> Menus
+                                    </Link>
+                                </li>
+                            </>
+                        )}
                     </ul>
                     <div className="d-flex align-items-center">
                         {user ? (
                             <>
                                 <span className="text-light me-3 fw-medium">
-                                    <i className="bi bi-person-circle text-warning me-1"></i>
+                                    {user.role === "admin" ? (
+                                        <i className="bi bi-shield-lock-fill text-warning me-1"></i>
+                                    ) : (
+                                        <i className="bi bi-person-circle text-warning me-1"></i>
+                                    )}
                                     Hi, {user.name}
                                 </span>
                                 <button className="btn btn-outline-warning btn-sm rounded-3 fw-medium" onClick={handleLogout}>
@@ -71,8 +98,16 @@ function Navbar({ user, onLogout, cartCount }) {
                                 <Link className="btn btn-outline-light btn-sm me-2 px-3 rounded-3 fw-medium" to="/login">
                                     Login
                                 </Link>
-                                <Link className="btn btn-warning btn-sm px-3 rounded-3 fw-bold" to="/register">
+                                <Link className="btn btn-warning btn-sm px-3 rounded-3 fw-bold me-2" to="/register">
                                     Register
+                                </Link>
+                                <Link
+                                    className="btn btn-sm px-3 rounded-3 fw-semibold d-flex align-items-center"
+                                    to="/login"
+                                    style={{ background: "#212529", color: "#ffc107", border: "1px solid #ffc107" }}
+                                    title="Admin Portal"
+                                >
+                                    <i className="bi bi-shield-lock-fill me-1"></i> Admin
                                 </Link>
                             </>
                         )}

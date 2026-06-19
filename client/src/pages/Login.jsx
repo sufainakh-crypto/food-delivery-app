@@ -16,8 +16,15 @@ function Login({ onLogin }) {
 
         try {
             const response = await api.post("/users/login", { email, password });
-            onLogin(response.data.user, response.data.token);
-            navigate("/");
+            const { user, token } = response.data;
+            onLogin(user, token);
+
+            // Auto-redirect based on role
+            if (user.role === "admin") {
+                navigate("/admin/dashboard");
+            } else {
+                navigate("/");
+            }
         } catch (err) {
             setError(err.response?.data?.message || "Invalid email or password");
         } finally {
@@ -25,9 +32,14 @@ function Login({ onLogin }) {
         }
     };
 
-    const fillMockCredentials = () => {
+    const fillUserCredentials = () => {
         setEmail("user@example.com");
         setPassword("password123");
+    };
+
+    const fillAdminCredentials = () => {
+        setEmail("admin@example.com");
+        setPassword("admin123");
     };
 
     return (
@@ -36,9 +48,9 @@ function Login({ onLogin }) {
                 <div className="card shadow-lg border-0 rounded-4">
                     <div className="card-body p-5">
                         <div className="text-center mb-4">
-                            <i className="bi bi-person-circle text-primary" style={{ fontSize: "3rem" }}></i>
-                            <h2 className="fw-bold mt-2 text-dark">Welcome Back</h2>
-                            <p className="text-muted">Sign in to order your favorite food</p>
+                            <i className="bi bi-egg-fried text-warning" style={{ fontSize: "3rem" }}></i>
+                            <h2 className="fw-bold mt-2 text-dark">Welcome to 5 Star Cafe</h2>
+                            <p className="text-muted">Sign in as a customer or administrator</p>
                         </div>
 
                         {error && (
@@ -85,7 +97,8 @@ function Login({ onLogin }) {
 
                             <button
                                 type="submit"
-                                className="btn btn-primary w-100 py-2.5 rounded-3 fw-semibold shadow-sm mb-3"
+                                className="btn btn-primary w-100 rounded-3 fw-semibold shadow-sm mb-3"
+                                style={{ padding: "0.6rem" }}
                                 disabled={loading}
                             >
                                 {loading ? (
@@ -94,19 +107,36 @@ function Login({ onLogin }) {
                                         Signing In...
                                     </>
                                 ) : (
-                                    "Sign In"
+                                    <><i className="bi bi-box-arrow-in-right me-1"></i> Sign In</>
                                 )}
                             </button>
                         </form>
 
-                        <button
-                            type="button"
-                            className="btn btn-outline-secondary w-100 py-2 rounded-3 fw-medium mb-4"
-                            onClick={fillMockCredentials}
-                        >
-                            <i className="bi bi-lightning-fill text-warning me-1"></i>
-                            Quick Fill Mock Credentials
-                        </button>
+                        {/* Quick fill buttons */}
+                        <div className="row g-2 mb-3">
+                            <div className="col-6">
+                                <button
+                                    type="button"
+                                    className="btn btn-outline-secondary w-100 rounded-3 fw-medium"
+                                    style={{ fontSize: "0.8rem" }}
+                                    onClick={fillUserCredentials}
+                                >
+                                    <i className="bi bi-lightning-fill text-warning me-1"></i>
+                                    Quick User Login
+                                </button>
+                            </div>
+                            <div className="col-6">
+                                <button
+                                    type="button"
+                                    className="btn w-100 rounded-3 fw-medium"
+                                    style={{ fontSize: "0.8rem", background: "#212529", color: "#ffc107", border: "1px solid #ffc107" }}
+                                    onClick={fillAdminCredentials}
+                                >
+                                    <i className="bi bi-shield-lock-fill me-1"></i>
+                                    Quick Admin Login
+                                </button>
+                            </div>
+                        </div>
 
                         <hr className="text-muted" />
 
