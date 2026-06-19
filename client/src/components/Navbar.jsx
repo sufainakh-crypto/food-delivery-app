@@ -103,7 +103,7 @@ function Navbar({ user, onLogout, cartCount }) {
                                 </Link>
                                 <Link
                                     className="btn btn-sm px-3 rounded-3 fw-semibold d-flex align-items-center"
-                                    to="/login"
+                                    to="/admin/login"
                                     style={{ background: "#212529", color: "#ffc107", border: "1px solid #ffc107" }}
                                     title="Admin Portal"
                                 >

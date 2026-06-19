@@ -7,6 +7,7 @@ import Register from "./pages/Register";
 import Cart from "./pages/Cart";
 import Orders from "./pages/Orders";
 import Checkout from "./pages/Checkout";
+import AdminLogin from "./pages/AdminLogin";
 
 // Admin Imports
 import AdminDashboard from "./pages/AdminDashboard";
@@ -148,7 +149,11 @@ function App() {
                     {/* /admin/login redirects to the unified /login */}
                     <Route
                         path="/admin/login"
-                        element={<Navigate to="/login" replace />}
+                        element={
+                            user
+                                ? (user.role === "admin" ? <Navigate to="/admin/dashboard" /> : <Navigate to="/" />)
+                                : <AdminLogin onLogin={loginUser} />
+                        }
                     />
                     <Route
                         path="/admin/dashboard"
